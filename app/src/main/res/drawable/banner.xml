@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder 320x180 tile for the TV's app row. James will design the real one. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path android:pathData="M0,0h320v180h-320z">
+        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt" name="android:fillColor">
+            <gradient android:type="linear"
+                android:startX="0" android:startY="0" android:endX="0" android:endY="180"
+                android:startColor="#FF2B2A8C" android:endColor="#FFE08A3C" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FFF4F4F4" android:pathData="M160,90m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0" />
+</vector>
