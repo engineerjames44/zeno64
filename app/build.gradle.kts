@@ -15,6 +15,16 @@ android {
         versionName = "0.1"
     }
 
+    buildTypes {
+        getByName("release") {
+            // The fast build for the TV: optimised and shrunk. It's a personal sideload, so it's signed with the
+            // local debug key, which lets it update the debug build already on the TV in place.
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     buildFeatures {
         compose = true
     }
@@ -25,4 +35,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose:1.10.1")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303") // the real org.json, since Android's is a stub in unit tests
 }

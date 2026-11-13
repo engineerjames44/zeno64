@@ -43,14 +43,22 @@ data class Channel(val number: Int, val name: String, val about: String, val zen
 @Composable
 fun HomeScreen(selected: Int, onSelect: (Int) -> Unit, onOpenZeno: () -> Unit, onOpenStats: () -> Unit, onOpenSettings: () -> Unit) {
     val weather by rememberWeather()
+    val feed = rememberFeed()
+    // Only tick (and redraw every second) while there's a call to time out; otherwise the guide stays still.
+    val call = if (feed?.feed?.liveCall != null) feed.visibleCall(rememberNow()) else null
+    val news = feed?.feed?.items?.size ?: 0
     val channels = listOf(
         Channel(1, "Netflix", "Shows and films", "Popcorn time?") { openApp(it, "com.netflix.ninja") },
         Channel(2, "YouTube", "Videos", "Just one video. Sure.") { openApp(it, "com.amazon.firetv.youtube") },
-        Channel(3, "Zeno", "Briefing and weather", "That's my channel.") { onOpenZeno() },
+        when {
+            call != null -> Channel(3, "Zeno", "On the phone now", "Shh, I'm on the phone.") { onOpenZeno() }
+            news > 0 -> Channel(3, "Zeno", "Briefing and weather", "I've got $news ${if (news == 1) "thing" else "things"} for you.") { onOpenZeno() }
+            else -> Channel(3, "Zeno", "Briefing and weather", "That's my channel.") { onOpenZeno() }
+        },
         Channel(4, "Stats", "Bloat removed, takeovers", "Numbers! My favourite.") { onOpenStats() },
         Channel(5, "Settings", "Wi-Fi, apps, remote", "Tinkering again?") { onOpenSettings() },
     )
-    BroadcastPage(greeting(), tickerLine(weather), glanceKey = selected) {
+    BroadcastPage(greeting(), tickerLine(weather, feed, call), glanceKey = selected) {
         Row(Modifier.fillMaxHeight()) {
             ChannelList(channels, selected, onSelect, Modifier.width(500.dp), rowHeight = 58)
             Box(Modifier.fillMaxHeight().width(3.dp).background(BevelDark))

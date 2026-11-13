@@ -17,6 +17,9 @@ Write-up: [jamescronin.dev/projects/zeno-64](https://www.jamescronin.dev/project
 - **Stats:** bloat switched off, memory and storage, and how long each Home press takes to hand over to Zeno 64.
 - **Settings:** opens the TV's own settings screens directly: Network, Applications, Remotes & Bluetooth,
   Device & Software, Accessibility.
+- **Zeno's news:** a feed from Zeno, my AI agent on a Raspberry Pi: his briefing, what's on, and a live transcript
+  while he's on the phone for me. The TV side is built; Zeno's side is being finished. See
+  [Zeno's news](#zenos-news) below.
 - **Debloat:** 17 ad, tracking, telemetry and unused preinstalled packages switched off with `pm disable-user`.
   Nothing is uninstalled.
 
@@ -47,6 +50,28 @@ without root it can't be disabled, and Android's own `set-home-activity` is igno
 Measured on my TV: no frames of Amazon's home in a frame-by-frame screen recording, and 0.2 to 0.6 seconds from
 pressing Home to Zeno 64.
 
+## Zeno's news
+
+There's no server on either side and no open port. The Pi drives the TV over adb on the home network, and sends a
+small JSON feed (version 1: briefing items, ticker lines, and a call in progress) as a broadcast:
+
+```bash
+adb -s <tv-ip>:5555 shell am broadcast -f 0x20 -a dev.jamescronin.zeno64.ZENO_FEED \
+  -n dev.jamescronin.zeno64/.ZenoFeedReceiver --es feed <base64 JSON>
+```
+
+- [`ZenoFeedReceiver`](app/src/main/java/dev/jamescronin/zeno64/ZenoFeedReceiver.kt) requires
+  `android.permission.DUMP`, which only adb shell and the system hold, so no app on the TV can send a fake feed. It
+  answers `result=1` when it accepts a feed and `result=0` when it ignores one.
+- [`ZenoFeed.kt`](app/src/main/java/dev/jamescronin/zeno64/ZenoFeed.kt) trusts nothing: plain text only, links,
+  tags and invisible characters stripped, every limit re-applied (8 KB, 8 items, 6 ticker lines), unknown kinds and
+  fields ignored. Unit tests in [`FeedParserTest.kt`](app/src/test/java/dev/jamescronin/zeno64/FeedParserTest.kt).
+- The latest feed is kept on the TV, so it survives a restart. A call shows only on Zeno's own channel, never over
+  Netflix or another app, and disappears if the Pi goes quiet for 20 seconds. Zeno is built to send emails only as
+  a count, never senders, subjects or contents.
+- To open Zeno 64 straight onto Zeno's channel:
+  `adb shell am start -n dev.jamescronin.zeno64/.MainActivity --es screen channel` (also `home`, `stats`, `settings`).
+
 ## Install
 
 You need the Android SDK (Android Studio installs it; set `ANDROID_HOME` or add `sdk.dir` to `local.properties`),
@@ -58,6 +83,9 @@ adb connect <tv-ip>:5555
 adb -s <tv-ip>:5555 install -r app/build/outputs/apk/debug/app-debug.apk
 tools/apply-zeno64.sh <tv-ip>:5555
 ```
+
+For the faster build, use `./gradlew assembleRelease` and install `app/build/outputs/apk/release/app-release.apk`
+instead. It's optimised and shrunk (about 1.7 MB instead of 20 MB) and signed with your local debug key.
 
 `apply-zeno64.sh` turns on the Home watcher and Zeno's screensaver, removes the alarm delay, and switches off the
 packages in [`debloat-packages.txt`](app/src/main/assets/debloat-packages.txt). Read that list before you run it.
@@ -82,8 +110,9 @@ back on. On another model, check your stock screensaver first with
 - Display & Sounds and Preferences only open for Amazon-signed apps, so picture and sound stay on the remote's
   settings button.
 - A Fire OS update can switch accessibility services off. Run `apply-zeno64.sh` again if Home goes back to Amazon.
-- Not built yet: Zeno, on his Raspberry Pi, sending briefings to the TV; Zeno seeing and driving the TV; switching
-  HDMI inputs.
+- Zeno's news: the TV side is built and tested with a sample feed. Zeno's side, in his private repo, is still being
+  finished.
+- Not built yet: switching HDMI inputs.
 
 ## Layout
 
@@ -96,6 +125,7 @@ app/src/main/java/dev/jamescronin/zeno64/
   SettingsScreen.kt    the settings menu
   Stats.kt             the stats page and its pixel charts
   Weather.kt           Open-Meteo weather and 12x12 pixel icons
+  ZenoFeed*.kt         Zeno's news: receiver, parser, storage
   Theme.kt, Broadcast.kt, ZenoSprite.kt   the look: colours, type, bevels, header, ticker, Zeno
 tools/                 apply, restore and debloat scripts; zeno_sprite.py draws Zeno pixel by pixel
 DESIGN.md              the design system

@@ -123,12 +123,16 @@ fun greeting(): Pair<String, String> = when (Calendar.getInstance().get(Calendar
     else -> "Good evening," to "James"
 }
 
-/** What the ticker says: greeting, weather when we have it, and that Zeno is around. */
-fun tickerLine(weather: Weather?): String = buildString {
+/** What the ticker says: greeting, Zeno's call and news, then the weather. */
+fun tickerLine(weather: Weather?, feed: ZenoFeedStore.State?, call: LiveCall?): String = buildString {
     append("${greeting().first} ${greeting().second}".uppercase(Locale.US))
+    if (call != null) append(SEP + ("Zeno is on the phone" + if (call.to.isEmpty()) "" else " with ${call.to}").uppercase(Locale.US))
+    val news = feed?.feed?.ticker.orEmpty()
+    news.forEach { append(SEP + it.uppercase(Locale.US)) }
     if (weather != null) {
-        append(SEP + "${weather.place} ${weather.tempF}° ${describe(weather.code)}".uppercase(Locale.US))
-        append(SEP + "TOMORROW ${describe(weather.days[1].code)}, HIGH ${weather.days[1].highF}°".uppercase(Locale.US))
+        append(SEP + "${weather.place} ${weather.tempF}\u00B0 ${describe(weather.code)}".uppercase(Locale.US))
+        weather.days.getOrNull(1)?.let { append(SEP + "TOMORROW ${describe(it.code)}, HIGH ${it.highF}\u00B0".uppercase(Locale.US)) }
     }
-    append(SEP + "NOTHING NEW FROM ZENO YET" + SEP)
+    if (call == null && news.isEmpty() && feed?.feed?.items.isNullOrEmpty()) append(SEP + "NOTHING NEW FROM ZENO YET")
+    append(SEP)
 }

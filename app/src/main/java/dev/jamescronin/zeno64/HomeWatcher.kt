@@ -36,6 +36,7 @@ class HomeWatcher : AccessibilityService() {
     private var lastRedirect = 0L
     private var redirectAt = 0L      // when the current takeover started, for the stats page
     private var weMuted = false
+    private var pendingOpen: PendingIntent? = null
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
@@ -47,10 +48,25 @@ class HomeWatcher : AccessibilityService() {
                 // Zeno 64 is up: note how long it took, then lift the cover
                 if (redirectAt > 0) Takeovers.record(this, SystemClock.elapsedRealtime() - redirectAt)
                 redirectAt = 0
+                pendingOpen = null
                 hideCover()
             }
+            // Another app came to the front before Zeno 64 opened (say the Pi pressed Home, then opened
+            // Netflix): stand down, so Zeno 64 doesn't jump on top of it.
+            cover != null && pkg != AMAZON_LAUNCHER && isApp(pkg) -> cancelRedirect()
             pkg == AMAZON_LAUNCHER && cls.startsWith("$AMAZON_LAUNCHER.ui.HomeActivity") -> redirect(timed = true)
         }
+    }
+
+    private fun isApp(pkg: String) =
+        packageManager.getLeanbackLaunchIntentForPackage(pkg) != null || packageManager.getLaunchIntentForPackage(pkg) != null
+
+    private fun cancelRedirect() {
+        pendingOpen?.let { getSystemService(AlarmManager::class.java).cancel(it) }
+        pendingOpen = null
+        redirectAt = 0
+        Log.i(TAG, "another app came to the front first, not opening Zeno 64")
+        hideCover()
     }
 
     private fun redirect(timed: Boolean) {
@@ -81,9 +97,11 @@ class HomeWatcher : AccessibilityService() {
         val open = PendingIntent.getActivity(
             this, 0,
             Intent(this, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                .putExtra("screen", "home"), // Home always lands on the guide
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        pendingOpen = open
         getSystemService(AlarmManager::class.java)
             .setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), open)
         // Never leave the cover up for long, whatever happens.
@@ -130,9 +148,11 @@ class HomeWatcher : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         Log.i(TAG, "watcher connected")
-        // At power-on Amazon's home is already up before we connect, so no "opened" event will come:
-        // open Zeno 64 straight away. (Not timed: boot isn't a Home press.)
-        redirect(timed = false)
+        // At power-on Amazon's home is already up before we connect, so no "opened" event will come: open
+        // Zeno 64 straight away. The watcher also reconnects after an app update, and then only reopen Zeno 64 if
+        // it was the app on screen, so an update never pulls anyone out of Netflix. (Not timed: not a Home press.)
+        val justBooted = SystemClock.elapsedRealtime() < 5 * 60_000
+        if (justBooted || MainActivity.wasOnScreen(this)) redirect(timed = false)
     }
 
     /**
