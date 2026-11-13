@@ -17,9 +17,9 @@ Write-up: [jamescronin.dev/projects/zeno-64](https://www.jamescronin.dev/project
 - **Stats:** bloat switched off, memory and storage, and how long each Home press takes to hand over to Zeno 64.
 - **Settings:** opens the TV's own settings screens directly: Network, Applications, Remotes & Bluetooth,
   Device & Software, Accessibility.
-- **Zeno's news:** a feed from Zeno, my AI agent on a Raspberry Pi: his briefing, what's on, and a live transcript
-  while he's on the phone for me. The TV side is built; Zeno's side is being finished. See
-  [Zeno's news](#zenos-news) below.
+- **Zeno runs the TV:** I text Zeno, my AI agent on a Raspberry Pi, and the TV does it ("put on Netflix",
+  "volume down 3", "TV off"). He also sends his news to the TV: his briefing, what's on, and a live transcript while
+  he's on the phone for me. See [Zeno's news](#zenos-news) below.
 - **Debloat:** 17 ad, tracking, telemetry and unused preinstalled packages switched off with `pm disable-user`.
   Nothing is uninstalled.
 
@@ -52,8 +52,9 @@ pressing Home to Zeno 64.
 
 ## Zeno's news
 
-There's no server on either side and no open port. The Pi drives the TV over adb on the home network, and sends a
-small JSON feed (version 1: briefing items, ticker lines, and a call in progress) as a broadcast:
+There's no server on either side and no open port. The Pi drives the TV over adb on the home network, from a fixed
+list of actions only (open an app, press a remote key, check what's on), and sends a small JSON feed (version 1:
+briefing items, ticker lines, and a call in progress) as a broadcast:
 
 ```bash
 adb -s <tv-ip>:5555 shell am broadcast -f 0x20 -a dev.jamescronin.zeno64.ZENO_FEED \
@@ -110,8 +111,7 @@ back on. On another model, check your stock screensaver first with
 - Display & Sounds and Preferences only open for Amazon-signed apps, so picture and sound stay on the remote's
   settings button.
 - A Fire OS update can switch accessibility services off. Run `apply-zeno64.sh` again if Home goes back to Amazon.
-- Zeno's news: the TV side is built and tested with a sample feed. Zeno's side, in his private repo, is still being
-  finished.
+- Zeno's side of the link (the TV actions and the feed sender) lives in his own private repo.
 - Not built yet: switching HDMI inputs.
 
 ## Layout
