@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_watcher_description">Zeno 64 home: when Amazon\'s home screen opens, Zeno 64 opens over it.</string>
+</resources>

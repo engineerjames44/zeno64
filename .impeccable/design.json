@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T20:08:14",
+  "title": "Design System: Zeno 64",
+  "extensions": {
+    "colorMeta": {
+      "sky-top": {
+        "role": "neutral",
+        "displayName": "Dusk Indigo",
+        "canonical": "#1F1D6E"
+      },
+      "sky-low": {
+        "role": "secondary",
+        "displayName": "Sunset Orange",
+        "canonical": "#E0893B"
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Royal Panel Blue",
+        "canonical": "#2E3DA6",
+        "tonalRamp": [
+          "#12175A",
+          "#26338F",
+          "#2E3DA6",
+          "#3D4FC4",
+          "#8593EE"
+        ]
+      },
+      "yellow": {
+        "role": "primary",
+        "displayName": "Signal Yellow",
+        "canonical": "#FFE14D"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Phosphor Paper",
+        "canonical": "#F4F1E6"
+      },
+      "dim": {
+        "role": "neutral",
+        "displayName": "Periwinkle Dim",
+        "canonical": "#B4BDF6"
+      }
+    },
+    "typographyMeta": {
+      "page-title": {
+        "displayName": "Page title",
+        "purpose": "Two stacked yellow lines in the header."
+      },
+      "hero-number": {
+        "displayName": "Hero number",
+        "purpose": "Current temperature; the single big number on a page."
+      }
+    },
+    "shadows": [
+      {
+        "name": "cg-drop",
+        "value": "2dp 2dp 0 #0A0C30",
+        "purpose": "Hard character-generator shadow on all text except the ticker label."
+      }
+    ],
+    "motion": [
+      {
+        "name": "blink",
+        "value": "130ms",
+        "purpose": "Zeno blink frame"
+      },
+      {
+        "name": "bob",
+        "value": "700ms step",
+        "purpose": "One-pixel breathing hop"
+      },
+      {
+        "name": "page-cut",
+        "value": "10s, no transition",
+        "purpose": "Channel page cycle"
+      },
+      {
+        "name": "crawl",
+        "value": "60dp/s continuous",
+        "purpose": "Ticker"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tv",
+        "value": "960x540dp"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Channel row",
+      "kind": "custom",
+      "refersTo": "channel-row-focused",
+      "description": "Focused row in a channel list.",
+      "html": "<div class=\"z-row\"><span class=\"z-arrow\"></span><b>1</b> Netflix <i>Shows and films</i></div>",
+      "css": ".z-row{font-family:'Jersey 15',monospace;background:#3D4FC4;color:#FFE14D;font-size:28px;padding:12px 14px;border-top:3px solid #8593EE;border-left:3px solid #8593EE;border-bottom:3px solid #12175A;border-right:3px solid #12175A;text-shadow:2px 2px 0 #0A0C30}.z-row i{font-style:normal;color:#F4F1E6;font-size:18px;float:right}.z-arrow{display:inline-block;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:8px solid #FFE14D;margin-right:8px}"
+    },
+    {
+      "name": "Ticker",
+      "kind": "custom",
+      "refersTo": "ticker",
+      "description": "Bottom crawl with the yellow label.",
+      "html": "<div class=\"z-tick\"><span>ZENO</span> GOOD EVENING, JAMES &#8226; BOSTON 48&#176; CLOUDY &#8226;</div>",
+      "css": ".z-tick{font-family:'Jersey 15',monospace;background:#15185A;color:#F4F1E6;font-size:20px;height:44px;line-height:44px;text-shadow:2px 2px 0 #0A0C30}.z-tick span{background:#FFE14D;color:#15185A;padding:0 14px;text-shadow:none;display:inline-block}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Station at Dusk",
+    "overview": "Every screen is one page of a 1990s cable information channel broadcasting from a sunset, with Zeno as the station mascot. Flat bevelled panels, one pixel face, hard shadows, stepped motion.",
+    "keyCharacteristics": [
+      "Dusk gradient ground",
+      "Bevel-only depth",
+      "One pixel face with hard drop shadow",
+      "Hand-drawn pixel sprite and icons",
+      "Stepped motion and hard cuts"
+    ],
+    "rules": [
+      {
+        "name": "One data colour",
+        "body": "Charts use yellow on a bevel-dark track with direct labels.",
+        "section": "colors"
+      },
+      {
+        "name": "Bevels are the only edges",
+        "body": "Light top-left, dark bottom-right; no blur shadows.",
+        "section": "elevation"
+      },
+      {
+        "name": "No eyebrows",
+        "body": "Titles are two stacked lines; nothing sits above them.",
+        "section": "typography"
+      }
+    ]
+  }
+}

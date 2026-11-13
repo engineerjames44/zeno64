@@ -1,0 +1,33 @@
+# Packages Zeno 64 switches off. One per line; "#" starts a comment; "## Name" starts a group (shown on the stats page).
+# Used by tools/debloat.sh, tools/undo-debloat.sh and the app's stats page.
+# Disabled with `pm disable-user` (not uninstalled), so `undo-debloat.sh` brings every one back.
+
+## Ads & tracking
+# Ads, ad tracking and "what's on your screen" tracking (ACR)
+com.amazon.tv.acr
+com.amazon.hybridadidservice
+com.amazon.shoptv.client
+com.amazon.shoptv.firetv.client
+com.amazon.sneakpeek
+com.amazon.media.recommendations
+
+## Telemetry
+# Usage metrics, performance and log uploads
+com.amazon.client.metrics.api
+com.amazon.wirelessmetrics.service
+com.amazon.perfcollection
+com.amazon.logan
+com.amazon.tv.fw.metrics
+
+## Unused apps
+# Preinstalled apps James doesn't use
+com.peacock.peacockfiretv
+com.fubo.firetv.screen
+tv.pluto.android
+com.cbs.ott
+com.farmflix.tv
+com.amazon.minitv.android.app
+
+# Amazon marks these "protected" and refuses to disable them without root (tested 2026-11-12):
+#   com.amazon.ftvads.deeplinking, com.amazon.device.metrics, com.amazon.device.logmanager,
+#   com.amazon.device.crashmanager, and the launcher itself (com.amazon.tv.launcher).

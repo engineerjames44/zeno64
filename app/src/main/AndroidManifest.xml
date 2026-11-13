@@ -5,6 +5,15 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
 
+    <!-- Weather from Open-Meteo. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Apps the home screen can open (needed on Android 11+, harmless on the TV's Android 9). -->
+    <queries>
+        <package android:name="com.netflix.ninja" />
+        <package android:name="com.amazon.firetv.youtube" />
+    </queries>
+
     <application
         android:label="Zeno 64"
         android:banner="@drawable/banner"
@@ -14,11 +23,44 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
+            <!-- Lets Zeno 64 be the TV's home app (chosen with `cmd package set-home-activity`). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
+
+        <!-- Zeno's channel as the TV screensaver. Turned on with an adb settings command, not automatically. -->
+        <service
+            android:name=".ZenoDream"
+            android:exported="true"
+            android:label="Zeno 64"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
+        <!-- The HOME takeover (see HomeWatcher.kt). Off until switched on over adb. -->
+        <service
+            android:name=".HomeWatcher"
+            android:exported="true"
+            android:label="Zeno 64 home"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/home_watcher" />
+        </service>
     </application>
 </manifest>
